@@ -1,3 +1,3 @@
-# DataScience_JohnsHopkins
+# DataScienceCoursera
 
-This repo contains assignments related to the Data Science Specialization by Johns Hopkins University.
+This repo contains course work related to the Data Science Specialization by Johns Hopkins University.
