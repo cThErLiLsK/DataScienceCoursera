@@ -22,9 +22,9 @@ The new data set (see 4.) contains 180 rows and 68 columns. The 180 rows contain
 The columns contain the following data:
 * id:  
   Unique identifier for each of 30 subject (column 1)
-* activity: 
+* activity:  
   Name of each of six activities (column 2)
-* BodyAcc.Mean_X.Axis - FourierTransform.BodyBodyGyroJerkMag.StandardDeviation (colums 3-68): 
+* BodyAcc.Mean_X.Axis - FourierTransform.BodyBodyGyroJerkMag.StandardDeviation (colums 3-68):  
   Mean and standard devation values for each of 33 measurements
 
 Details on the individual measurements are available in the zip folder of the original data.
