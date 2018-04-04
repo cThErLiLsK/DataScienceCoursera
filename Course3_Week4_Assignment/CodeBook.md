@@ -20,11 +20,11 @@ There were four major transformation steps performed on the data set:
 The new data set (see 4.) contains 180 rows and 68 columns. The 180 rows contain the means for each variable for 30 subjects and six different activities. 
 
 The columns contain the following data:
-* id: 
+* id:  
   Unique identifier for each of 30 subject (column 1)
 * activity: 
   Name of each of six activities (column 2)
-* BodyAcc.Mean_X.Axis : FourierTransform.BodyBodyGyroJerkMag.StandardDeviation (colums 3:68)
+* BodyAcc.Mean_X.Axis - FourierTransform.BodyBodyGyroJerkMag.StandardDeviation (colums 3-68): 
   Mean and standard devation values for each of 33 measurements
 
 Details on the individual measurements are available in the zip folder of the original data.
