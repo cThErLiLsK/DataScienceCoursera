@@ -71,4 +71,4 @@ names(df) <- newNames
 # 5. Create average of each variable for each activity and each subject
 dfSummary <- df %>% group_by(id, activity) %>% summarise_all(funs(mean))
 
-write.csv(dfSummary, file = "MeansByIdAndActivity.csv", row.names = FALSE)
+write.table(dfSummary, file = "MeansByIdAndActivity.txt", row.names = FALSE)
