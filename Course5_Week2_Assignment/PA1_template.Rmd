@@ -97,6 +97,12 @@ meanStepsPerDay1 <- mean(totalStepsPerDay1)
 medianStepsPerDay1 <- median(totalStepsPerDay1)
 sprintf("The mean number of steps per day is %.2f.", meanStepsPerDay1)
 sprintf("The median number of steps per day is %.2f.", medianStepsPerDay1)
+
+df_totalStepsPerDay1<- data.frame(date = names(totalStepsPerDay1), totalSteps = totalStepsPerDay1)
+
+ggplot(df_totalStepsPerDay1, aes(totalSteps)) + geom_histogram(bins = 20, na.rm = TRUE) +
+  scale_y_continuous(name = 'Frequency', breaks = seq(0, 10, length = 6)) +
+  ggtitle('Total number of steps per day') + xlab(NULL)
 ```
 
 In Q1, NA values were excluded from the calculation. This means, that if only NA values were available for a specific date, the total number of steps for the day becomes zero. In Q3, though, NAs were imputed so that the total number of steps becomes different from and higher than zero. This leads to a **higher mean** after values are imputed regardless of the method used for imputing the value (except for the one which sets all NA values to zero). The effect on the median seems more dependent on the method and the specifics of the dataset.  
@@ -136,7 +142,6 @@ ggplot(df_totalStepsPerCategoryInterval, aes(datetime, totalSteps, group = 1)) +
   ylab('Average number of steps') + 
   scale_x_datetime(labels = date_format('%H:%M', tz = 'Europe/Berlin')) +
   xlab('5-min interval starting at')
-
 ```
 
 The plot shows that there is indeed a difference between weekdays and weekends: During weekdays, there is a very strong peak around 8.30am (most likely the time when most people are on their way to their daily occupations), which cannot be found on weekends. In contrast, the average number of steps is much more evenly distributed on weekends throughout the active hours of the day. These active hours also start a bit later on weekends compared to weekdays. 
