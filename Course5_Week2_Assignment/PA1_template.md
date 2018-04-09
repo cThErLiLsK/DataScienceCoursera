@@ -108,6 +108,9 @@ ggplot(df_avgStepsPerInterval, aes(interval, avgSteps, group = 1)) + geom_line()
 
 ### Q3: Imputing missing values
 
+**Strategy to impute values:**  
+Use mean value for each interval as the value for each mssing value.  
+
 In order to answer the question, the following code is used:
 
 

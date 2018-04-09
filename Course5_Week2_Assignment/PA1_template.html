@@ -183,6 +183,8 @@ ggplot(df_avgStepsPerInterval, aes(interval, avgSteps, group = 1)) + geom_line()
 </div>
 <div id="q3-imputing-missing-values" class="section level3">
 <h3>Q3: Imputing missing values</h3>
+<p><strong>Strategy to impute values:</strong><br />
+Use mean value for each interval as the value for each mssing value.</p>
 <p>In order to answer the question, the following code is used:</p>
 <pre class="r"><code>numNA &lt;- sum(is.na(datafr))
 sprintf(&quot;The total number of missing values in the dataset is %i.&quot;, numNA)</code></pre>
