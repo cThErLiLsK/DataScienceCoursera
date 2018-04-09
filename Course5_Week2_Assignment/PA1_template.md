@@ -148,6 +148,16 @@ sprintf("The median number of steps per day is %.2f.", medianStepsPerDay1)
 ## [1] "The median number of steps per day is 10766.19."
 ```
 
+```r
+df_totalStepsPerDay1<- data.frame(date = names(totalStepsPerDay1), totalSteps = totalStepsPerDay1)
+
+ggplot(df_totalStepsPerDay1, aes(totalSteps)) + geom_histogram(bins = 20, na.rm = TRUE) +
+  scale_y_continuous(name = 'Frequency', breaks = seq(0, 10, length = 6)) +
+  ggtitle('Total number of steps per day') + xlab(NULL)
+```
+
+![](PA1_template_files/figure-html/Q3-1.png)<!-- -->
+
 In Q1, NA values were excluded from the calculation. This means, that if only NA values were available for a specific date, the total number of steps for the day becomes zero. In Q3, though, NAs were imputed so that the total number of steps becomes different from and higher than zero. This leads to a **higher mean** after values are imputed regardless of the method used for imputing the value (except for the one which sets all NA values to zero). The effect on the median seems more dependent on the method and the specifics of the dataset.  
 Here, the NAs were replaced by the mean for the respective interval. For this method and dataset, the **median increased** as well and has the same value as the mean.  
 That mean and median are identical in these circumstances is not a complete coincidence. As data for whole days was missing for some dates, these dates were filled with exactly the average. So there are some dates somewhere "around the middle" of the dataset with exactly the mean value and one of them is the median value.
@@ -175,9 +185,7 @@ datafr$categoryInterval <- with(datafr, paste(category, interval, sep = '.'))
 
 totalStepsPerCategoryInterval <- tapply(datafr$steps, datafr$categoryInterval, function (x) mean(x, na.rm = TRUE))
 
-df_totalStepsPerCategoryInterval <- data.frame(categoryInterval = names(totalStepsPerCategoryInterval), totalSteps = totalStepsPerCategoryInterval)
-
-df_totalStepsPerCategoryInterval$categoryInterval <- as.character(df_totalStepsPerCategoryInterval$categoryInterval)
+df_totalStepsPerCategoryInterval <- data.frame(categoryInterval = as.character(names(totalStepsPerCategoryInterval)), totalSteps = totalStepsPerCategoryInterval)
 
 df_totalStepsPerCategoryInterval <- separate(data = df_totalStepsPerCategoryInterval, col = categoryInterval, into = c('category', 'interval'), sep ='\\.')
 

@@ -125,9 +125,7 @@ datafr$categoryInterval <- with(datafr, paste(category, interval, sep = '.'))
 
 totalStepsPerCategoryInterval <- tapply(datafr$steps, datafr$categoryInterval, function (x) mean(x, na.rm = TRUE))
 
-df_totalStepsPerCategoryInterval <- data.frame(categoryInterval = names(totalStepsPerCategoryInterval), totalSteps = totalStepsPerCategoryInterval)
-
-df_totalStepsPerCategoryInterval$categoryInterval <- as.character(df_totalStepsPerCategoryInterval$categoryInterval)
+df_totalStepsPerCategoryInterval <- data.frame(categoryInterval = as.character(names(totalStepsPerCategoryInterval)), totalSteps = totalStepsPerCategoryInterval)
 
 df_totalStepsPerCategoryInterval <- separate(data = df_totalStepsPerCategoryInterval, col = categoryInterval, into = c('category', 'interval'), sep ='\\.')
 
