@@ -7,7 +7,7 @@ output:
 
 ## Executive Summary
 
-Fitness devices today can capture a lot of information on how much people exercise, but they do not yet capture how well certain exercises are performed. This may require additional sensors. This project analysis accelerometer date from weight lifting exercises and tries to identify how well these were performed. The analysis is based on a random forest model. The results suggest that it is indeed possible to predict how well these exercises were performed.  
+Fitness devices today can capture a lot of information on how much people exercise, but they do not yet capture how well certain exercises are performed. This may require additional sensors. This project analysis accelerometer date from weight lifting exercises and tries to identify how well these were performed. The analysis is based on a random forest model. The results suggest that it is indeed possible to predict how well these exercises were performed, even if it not known which specific user performs the exercise.  
 
 ## Research Question
 
@@ -82,7 +82,7 @@ The plot shows that classe A (which stands for the correct execution of the exer
 
 ## Modelling 
 
-As there is no obvious answer to the question which of the measurements are relevant for the prediction, I use a model which includes all of the measured 53 remaining independent variables. A random forest algorithm is used.  
+As there is no obvious answer to the question which of the measurements are relevant for the prediction, I use a model which includes all of the measured 53 remaining independent variables. A random forest algorithm is used. In this **initial model**, the user names are included in the training and cross-validation dataset.  
 
 In order to increase computing speed, parallel computing is used. Additionally, the resampling method was changed from the default of bootstrapping to k-fold cross-validation with k = 5. The impact of this change is to reduce the number of samples against which the random forest algorithm is run from 25 to 5, and to change each sample's composition from leave one out to randomly selected training folds. Details on this approach can be found at https://github.com/lgreski/datasciencectacontent/blob/master/markdown/pml-randomForestPerformance.md.
 
@@ -109,20 +109,54 @@ The model is then used to predict the performance on the training and cross-vali
 predictTrain <- predict(model, train)
 predictCrossValidation <- predict(model, crossValidation)
 
-confusionMatrix(predictTrain, train$classe)
-confusionMatrix(predictCrossValidation, crossValidation$classe)
-
 accuracyTrain <- confusionMatrix(predictTrain, train$classe)$overall[[1]]
 accuracyCrossValidation <- confusionMatrix(predictCrossValidation, crossValidation$classe)$overall[[1]]
 ```
 
-The model reaches an accuracy of `round(r accuracyTrain, 2)` on the training set and of `r round(accuracyCrossValidation, 2)` on the cross-validation set. The appendix contains details on the performance on the training and cross-validation set based on the function `confusionMatrix()` in r. 
+The model reaches an **accuracy of `r round(accuracyTrain, 2)` on the training set and of `r round(accuracyCrossValidation, 2)` on the cross-validation set**. The appendix contains details on the performance on the training and cross-validation set based on the function `confusionMatrix()` in r. 
 
-The predictions for the test dataset are also contained in the appendix. The predictions were 100% accurate according to the Prediction Quiz.
+The predictions for the test dataset are also contained in the appendix. **The predictions on the test dataset were 100% accurate according to the Prediction Quiz.**  
+
+In this analysis, the names of the users were included in the independent variables. The **revised model** uses the same data, except that the user names are removed from the dataset. 
+
+```{r, cache = TRUE, warning = FALSE, message = FALSE}
+library(parallel)
+library(doParallel)
+
+cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
+registerDoParallel(cluster)
+
+fitControl <- trainControl(method = "cv",
+                           number = 5,
+                           allowParallel = TRUE)
+
+train2 <- train[, -1]
+crossValidation2 <- crossValidation[, -1]
+test2 <- test[, -1]
+
+model2 <- train(classe ~ ., method="rf",data = train2,trControl = fitControl)
+
+stopCluster(cluster)
+registerDoSEQ()
+```
+
+```{r}
+predictTrain2 <- predict(model2, train2)
+predictCrossValidation2 <- predict(model2, crossValidation2)
+
+accuracyTrain2 <- confusionMatrix(predictTrain2, train$classe)$overall[[1]]
+accuracyCrossValidation2 <- confusionMatrix(predictCrossValidation2, crossValidation$classe)$overall[[1]]
+```
+
+This revised model excluding the user names **also reaches an accuracy of `r round(accuracyTrain2, 2)` on the training set and of `r round(accuracyCrossValidation2, 2)` on the cross-validation set**.  
+
+**The predictions on the test dataset were identical to the predictions of the initial model and also 100% accurate according to the Prediction Quiz.**    
 
 ## Conclusion
 
-The results suggest that it is indeed possible to predict how well these exercises were performed. indeed is possible not only on the training, but also on the test dataset. 
+The results suggest that it is indeed possible to predict how well exercises are performed, even if it not known which specific user performs the exercise.  
+
+However, the test data only includes users which were also in the training and cross-validation set. Therefore, it is not clear yet whether a trained model would also generalize to new users. If so, the model could be applied to new users withouth any further training. If not, users would have to train the model with their data by performing and then labeling how well they performed the exercises before they could apply the model. This, however may not be realistic in practical applications. 
 
 ## Appendix 
 
@@ -138,5 +172,8 @@ confusionMatrix(predictCrossValidation, crossValidation$classe)
 
 ```{r}
 predictTest <- predict(model, test)
-data.frame(case = 1:length(predictTest), prediction = predictTest)
+predictTest <- predict(model, test)
+predictTest2 <- predict(model2, test2)
+data.frame(case = 1:length(predictTest), prediction_model = predictTest, prediction_model2 = predictTest2,
+           same_prediction = predictTest == predictTest2)
 ```
