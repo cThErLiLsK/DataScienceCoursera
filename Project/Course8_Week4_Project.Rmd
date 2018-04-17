@@ -1,0 +1,142 @@
+---
+title: "Course8_Week4_Project"
+output: 
+  html_document:
+    keep_md: true
+---
+
+## Executive Summary
+
+Fitness devices today can capture a lot of information on how much people exercise, but they do not yet capture how well certain exercises are performed. This may require additional sensors. This project analysis accelerometer date from weight lifting exercises and tries to identify how well these were performed. The analysis is based on a random forest model. The results suggest that it is indeed possible to predict how well these exercises were performed.  
+
+## Research Question
+
+The following analysis tries to answer the following question:
+
+*Based on measurements from accelerometers during exercise, is it possible to identify how well an exercise was executed?*
+
+The analysis is based on measurements on a number of individuals that performed a weight lifting exercises. More details on this can be found at http://groupware.les.inf.puc-rio.br/har.
+
+## Data Preprocessing
+
+As an initial step, the data for the project is downloaded from the Internet.
+
+```{r}
+url_training <- 'https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv'
+url_testing <- 'https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv'
+
+if(!file.exists('pml-training.csv')) {
+  download.file(url_training,'pml-training.csv')
+}
+if(!file.exists('pml-testing.csv')) {
+  download.file(url_testing,'pml-testing.csv')
+}
+
+training = read.csv('pml-training.csv')
+testing = read.csv('pml-testing.csv')
+```
+
+I then did some preprocessing on the data, specifically:
+
+- Remove all columns with more thant 1% of missing data
+- Remove all rows with missing values based on the remaining columns
+- Eliminiate columns with running number, those related to date and time and windows which seem to have little relevance for the task
+- Convert dependent variable (classe) into factor (in training set only as classe not given for test set)
+
+Furthermore, I split the training set again in 80% for training and 20% for cross-validation.
+
+```{r, warning = FALSE, message = FALSE}
+library(caret)
+
+cols <- colSums(is.na(training)) < (0.01 / nrow(training)) & colSums(training == '') < (0.01 / nrow(training)) 
+
+train <- training[, cols]
+train <- na.omit(train)
+train <- train[, -c(1, 3:7)]
+train$classe <- as.factor(train$classe)
+
+test <- testing[, cols]
+test <- na.omit(test)
+test <- test[, -c(1, 3:7)]
+
+inTrain = createDataPartition(train$classe, p = 0.8, list = FALSE)
+train = train[ inTrain,]
+crossValidation = train[-inTrain,]
+```
+
+## Exploratory Data Analysis
+
+After data preprocessing, the data set contains 53 independent variables remain and the one dependent variable that should be predicted. No rows were eliminated.  
+
+Due to the large number of independent variables, it is difficult to perform a concise exploratory data analysis. I therefore focused on the dependent variable and the different users. The appendix contains a short overview of the data based on the `str()` function.
+
+```{r}
+library(ggplot2)
+
+ggplot(train, aes(classe, fill = classe=='A')) + geom_bar() + facet_grid(.~user_name) + 
+  labs(x=NULL, y = 'Number of observations', title = 'Number of observations by user and classe') +
+  guides(fill=FALSE)
+```
+
+The plot shows that classe A (which stands for the correct execution of the exercise) is the most common oberservation for all users while all other exercises are roughly equally frequent. It also shows that the number of observations per user can vary, but that for each user and classe al least 300 observations exist.
+
+## Modelling 
+
+As there is no obvious answer to the question which of the measurements are relevant for the prediction, I use a model which includes all of the measured 53 remaining independent variables. A random forest algorithm is used.  
+
+In order to increase computing speed, parallel computing is used. Additionally, the resampling method was changed from the default of bootstrapping to k-fold cross-validation with k = 5. The impact of this change is to reduce the number of samples against which the random forest algorithm is run from 25 to 5, and to change each sample's composition from leave one out to randomly selected training folds. Details on this approach can be found at https://github.com/lgreski/datasciencectacontent/blob/master/markdown/pml-randomForestPerformance.md.
+
+```{r, cache = TRUE, warning = FALSE, message = FALSE}
+library(parallel)
+library(doParallel)
+
+cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
+registerDoParallel(cluster)
+
+fitControl <- trainControl(method = "cv",
+                           number = 5,
+                           allowParallel = TRUE)
+
+model <- train(classe ~ ., method="rf",data = train,trControl = fitControl)
+
+stopCluster(cluster)
+registerDoSEQ()
+```
+
+The model is then used to predict the performance on the training and cross-validation set.
+
+```{r}
+predictTrain <- predict(model, train)
+predictCrossValidation <- predict(model, crossValidation)
+
+confusionMatrix(predictTrain, train$classe)
+confusionMatrix(predictCrossValidation, crossValidation$classe)
+
+accuracyTrain <- confusionMatrix(predictTrain, train$classe)$overall[[1]]
+accuracyCrossValidation <- confusionMatrix(predictCrossValidation, crossValidation$classe)$overall[[1]]
+```
+
+The model reaches an accuracy of `round(r accuracyTrain, 2)` on the training set and of `r round(accuracyCrossValidation, 2)` on the cross-validation set. The appendix contains details on the performance on the training and cross-validation set based on the function `confusionMatrix()` in r. 
+
+The predictions for the test dataset are also contained in the appendix. The predictions were 100% accurate according to the Prediction Quiz.
+
+## Conclusion
+
+The results suggest that it is indeed possible to predict how well these exercises were performed. indeed is possible not only on the training, but also on the test dataset. 
+
+## Appendix 
+
+```{r}
+str(train)
+```
+
+
+```{r}
+confusionMatrix(predictTrain, train$classe)
+confusionMatrix(predictCrossValidation, crossValidation$classe)
+```
+
+```{r}
+predictTest <- predict(model, test)
+data.frame(case = 1:length(predictTest), prediction = predictTest)
+```
