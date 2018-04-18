@@ -1,0 +1,44 @@
+---
+title: "Course9_Week2_Assignment"
+output: html_document
+---
+
+## My favorite Latte in the neighborhood
+
+### Date created: 2018/18/04
+
+The following dataframe contains some data on my favorite latte places in the neighborhood.
+
+```{r}
+df <- data.frame(name = c('Chocolatte', 'Chocolatte 2', 'SFCC', 'Schmitt'),
+  priceMediumLatte = c(2.30, 2.30, 3.50, 2.50),
+  latitude = c(48.1386130, 48.1321880, 48.1345870, 48.1412190),
+  longitude = c(11.6113110, 11.5980660, 11.5971200, 11.6205460),
+  price = c(2.30, 2.30, 3.70, 2.70),
+  thumbsUp = c('great', 'great', 'verygood', 'good'))
+
+info <- paste0('<b>', df$name, '</b> ', '<br> ', 'Medium Latte: ', '<br> ', df$price, ' EUR')
+```
+
+For these places I created a map based with leaflet that shows a thumbs up icon. The sizes of the icon corresponds to the thumbs up rating in the dataframe. On click of the icon, the name of the place and the price of the latte is displayed.
+
+```{r, warning = FALSE, message = FALSE}
+library(leaflet)
+
+thumbsIcons <- iconList(
+  great = makeIcon(
+    iconUrl = 'https://upload.wikimedia.org/wikipedia/commons/5/5f/Symbol_thumbs_up_green.png',
+      iconWidth = 80, iconHeight = 80, iconAnchorX = 0, iconAnchorY = 0
+  ),
+  verygood = makeIcon(
+    iconUrl = 'https://upload.wikimedia.org/wikipedia/commons/5/5f/Symbol_thumbs_up_green.png',
+      iconWidth = 60, iconHeight = 60,iconAnchorX = 0, iconAnchorY = 0
+  ),
+  good = makeIcon(
+    iconUrl = 'https://upload.wikimedia.org/wikipedia/commons/5/5f/Symbol_thumbs_up_green.png',
+      iconWidth = 40, iconHeight = 40,iconAnchorX = 0, iconAnchorY = 0
+  )
+)
+
+df %>% leaflet() %>% addTiles() %>% addMarkers(icon = ~thumbsIcons[thumbsUp], popup = info)
+```
