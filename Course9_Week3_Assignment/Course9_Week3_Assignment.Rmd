@@ -1,0 +1,29 @@
+---
+title: "The Impact of Alcohol and Tobacco on Coronary Heart Disease"
+output: html_document
+---
+### Date: 2018/04/18
+
+```{r, message = FALSE, warning = FALSE}
+library(ElemStatLearn)
+library(plotly)
+
+suppressPackageStartupMessages(library(plotly))
+
+data(SAheart)
+
+df <- SAheart
+df$Condition <- as.factor(df$chd)
+levels(df$Condition) <- c('yes', 'no')
+df$Obesity <- df$obesity
+
+plot_ly(x = df$alcohol, y = df$tobacco, mode = 'markers', marker = list(
+    color = factor(df$Condition, labels=c("green", "red")), 
+    size = df$Obesity/2, 
+    opacity = df$age / max(df$age)), 
+  color = df$Condition) %>% 
+  layout(title = 'Alcohol and tobacco consumption versus Coronary Heart Condition',
+         xaxis = list(title = "Alcohol consumption"), yaxis = list(title = "Tobacco consumption"))
+```
+
+*Source: South African Hearth Disease Data from `SAheart` dataset available from `library(ElemStatLearn)`*
