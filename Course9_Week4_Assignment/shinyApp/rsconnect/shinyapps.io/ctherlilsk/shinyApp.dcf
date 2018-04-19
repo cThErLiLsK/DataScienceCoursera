@@ -1,0 +1,12 @@
+name: shinyApp
+title: shinyApp
+username:
+account: ctherlilsk
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 325980
+bundleId: 1327327
+url: https://ctherlilsk.shinyapps.io/shinyApp/
+when: 1524137932.97349
+asMultiple: FALSE
+asStatic: FALSE
